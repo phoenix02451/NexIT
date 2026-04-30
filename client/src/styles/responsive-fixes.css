@@ -1,0 +1,437 @@
+/* Layout: avoid 100vw horizontal scroll + clipped backgrounds */
+.home,
+.about,
+.team,
+.faq {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+/* Mobile: fixed parallax backgrounds often clip or fail */
+@media (max-width: 992px) {
+  .counters,
+  .communicate {
+    background-attachment: scroll;
+  }
+}
+
+/* Hero background always visible */
+.home {
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Testimonials: image on top, name / role / quote below */
+.testimonials .testimonial-img {
+  aspect-ratio: 4 / 3;
+  min-height: 200px;
+  max-height: 320px;
+}
+
+.testimonials .testimonial-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.testimonials-swiper .swiper-slide {
+  height: auto;
+}
+
+.testimonials-swiper .testimonial-item.testimonial-card-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  min-height: 100%;
+}
+
+.testimonials-swiper .testimonial-card-vertical .testimonial-text {
+  width: 100%;
+  flex: 1 1 auto;
+  text-align: center;
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+
+.testimonials-swiper .testimonial-card-vertical .testimonial-text h3 {
+  font-size: clamp(1.05rem, 2.2vw, 1.15rem);
+  margin-bottom: 0.35rem;
+}
+
+.testimonials-swiper .testimonial-card-vertical .testimonial-text h4 {
+  font-size: clamp(0.72rem, 1.6vw, 0.82rem);
+  line-height: 1.35;
+  margin-bottom: 0.75rem;
+  color: #555;
+}
+
+.testimonials-swiper .testimonial-card-vertical .testimonial-text p {
+  font-size: clamp(0.88rem, 1.8vw, 0.95rem);
+  line-height: 1.55;
+  text-align: left;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+/* Titles with huge negative margins pushed content off-screen on phones */
+.testimonials .section-header h2.testimonials-heading,
+.testimonials .section-header p.testimonials-sub {
+  margin-top: 0 !important;
+}
+
+.testimonials .section-header p.testimonials-sub {
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+}
+
+.testimonials.mt-100 {
+  padding-top: clamp(3rem, 8vw, 6rem);
+}
+
+@media (min-width: 993px) {
+  .testimonials .section-header h2.testimonials-heading {
+    margin-top: -6rem !important;
+  }
+}
+
+/* Clients strip: tame overlap on small viewports */
+@media (max-width: 992px) {
+  .clients.mt-100 {
+    margin-top: -3rem !important;
+    margin-bottom: -3rem !important;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .clients.mt-100 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+.clients-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clients-swiper img {
+  display: block;
+  max-width: 100%;
+  width: auto;
+  max-height: 72px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Introduce section: full-width office photos in carousel */
+.introduce-slide-figure {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.introduce-slide-img {
+  display: block;
+  width: 100%;
+  height: clamp(200px, 42vw, 320px);
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.introduce-swiper.clients-swiper img.introduce-slide-img {
+  max-height: none;
+  height: clamp(200px, 42vw, 320px);
+}
+
+/* Team: horizontal row of cards (keeps .team .row .card base styles) */
+.team {
+  min-width: 0 !important;
+  min-height: auto !important;
+  width: 100%;
+  padding-left: clamp(1.25rem, 5vw, 3.5rem);
+  padding-right: clamp(1.25rem, 5vw, 3.5rem);
+  box-sizing: border-box;
+}
+
+/* Tighter “Our team” block – overrides legacy 95vh min-height, huge image padding, reflection gap */
+.team.team-compact {
+  margin-top: clamp(2.5rem, 5vw, 3.75rem) !important;
+  padding-top: clamp(1rem, 2.5vw, 1.75rem);
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.team.team-compact .heading.team-heading-compact,
+.team.team-compact .heading {
+  padding-top: clamp(2.25rem, 5vw, 3.25rem) !important;
+  margin-top: 0 !important;
+  margin-bottom: clamp(0.75rem, 2vw, 1.25rem) !important;
+}
+
+.team-cards-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  /* space between each team card / portrait group */
+  column-gap: clamp(1.25rem, 3vw, 2.75rem);
+  row-gap: clamp(1.75rem, 4vw, 2.5rem);
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(0.75rem, 3vw, 2rem) clamp(1.25rem, 2.5vw, 1.75rem);
+  box-sizing: border-box;
+}
+
+.team-cards-row > .row {
+  display: block;
+  flex: 0 1 auto;
+  width: auto;
+}
+
+.team .team-cards-row .row .card {
+  margin: 0.5rem clamp(0.65rem, 1.8vw, 1.25rem) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  -webkit-box-reflect: none !important;
+}
+
+.team.team-compact .team-cards-row .row .card .image {
+  padding-top: 1.15rem !important;
+  margin: 0.35rem 0 0.5rem !important;
+}
+
+.team.team-compact .team-cards-row .row .card .info {
+  padding: 0.35rem 0.5rem 0.75rem;
+}
+
+.team.team-compact .team-cards-row .row .card .info h3 {
+  margin-top: 0.35rem;
+  margin-bottom: 0.2rem;
+}
+
+.team.team-compact .team-cards-row .row .card .info span {
+  display: inline-block;
+  margin-bottom: 0.45rem;
+}
+
+.team.team-compact .team-cards-row .row .card .info .icons a {
+  margin-top: 0.45rem !important;
+  padding: 0.55rem 0.65rem !important;
+}
+
+/* Horizontal margin on each team portrait (individual photos) */
+.team .team-cards-row .row .card .image {
+  box-sizing: border-box;
+}
+
+.team .team-cards-row .row .card .image img {
+  display: block;
+  margin-inline: clamp(0.85rem, 2.8vw, 1.85rem);
+  width: min(13rem, 28vw);
+  height: min(13rem, 28vw);
+}
+
+@media (max-width: 1100px) {
+  .team .team-cards-row .row .card .image img {
+    margin-inline: clamp(0.75rem, 2.5vw, 1.5rem);
+    width: min(12rem, 30vw);
+    height: min(12rem, 30vw);
+  }
+}
+
+@media (max-width: 720px) {
+  .team-cards-row {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
+    column-gap: clamp(1rem, 4vw, 1.75rem);
+  }
+
+  .team-cards-row > .row {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .team .team-cards-row .row .card {
+    width: min(22rem, 86vw) !important;
+    margin: 0.75rem clamp(0.5rem, 2vw, 1rem) !important;
+  }
+}
+
+/* Keep team row horizontal under original @media (max-width: 1000px) rules */
+@media (max-width: 1000px) {
+  .team-cards-row > .row {
+    flex-direction: row !important;
+    display: block !important;
+  }
+}
+
+/* Contact map: height="auto" on iframe = ~0 visible map */
+.contact-map {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 280px;
+}
+
+.contact-map iframe.contact-map-frame {
+  display: block;
+  width: 100%;
+  min-height: 280px;
+  height: 320px;
+  max-width: 100%;
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  .contact-in {
+    width: min(96%, 52rem) !important;
+    flex-direction: column !important;
+    align-items: stretch;
+  }
+
+  .contact-map,
+  .contact-form {
+    flex: 1 1 100% !important;
+    max-width: 100%;
+  }
+
+  .contact-form-txt,
+  .contact-form-email,
+  .contact-form-phone,
+  .contact-form-txtarea,
+  .contact-form-btn {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* FAQ background centered; accordion full width on tablets */
+.faq {
+  background-position: center;
+}
+
+@media (max-width: 900px) {
+  .faq .row .accordion-container {
+    width: 100% !important;
+    max-width: 100%;
+  }
+}
+
+/* Portfolio section heading */
+@media (max-width: 768px) {
+  .section-head-1 h4 {
+    margin-top: 0 !important;
+  }
+}
+
+/* About row padding on small phones */
+@media (max-width: 576px) {
+  .about .row {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .about {
+    line-height: 1.5 !important;
+  }
+}
+
+/* Counters: single column on very narrow */
+@media (max-width: 480px) {
+  .counters .container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Typography scale on small screens */
+@media (max-width: 576px) {
+  .home h1 {
+    font-size: clamp(2.4rem, 9vw, 4rem) !important;
+    line-height: 1.15;
+  }
+
+  .home h2 {
+    font-size: clamp(1.5rem, 5vw, 2.2rem) !important;
+  }
+
+  .communicate h3 {
+    font-size: clamp(1.8rem, 5vw, 2.8rem) !important;
+  }
+
+  .communicate p {
+    font-size: clamp(1.4rem, 4vw, 2rem) !important;
+  }
+}
+
+/* Header brand mark */
+.header .logo .logo-img {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  max-width: none;
+  object-fit: contain;
+}
+
+.header .logo .logo-wordmark {
+  font-size: clamp(1.25rem, 3.5vw, 1.85rem);
+}
+
+/* Careers page: radio block was 110% wide */
+.career .radio-class {
+  width: 100% !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
+  min-height: 8rem;
+}
+
+.careers-page .home {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .career {
+    width: min(96%, 48rem) !important;
+  }
+
+  .career-form-txt,
+  .career-form-email,
+  .career-form-phone,
+  .career-form-experience,
+  .career-form-txtarea,
+  .career-form-btn {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .careers-page .home h2 {
+    font-size: clamp(2rem, 8vw, 4rem) !important;
+  }
+}
+
+/* Swiper slides: remove horizontal bleed */
+.testimonials .testimonial-item {
+  margin-left: 0;
+  margin-right: 0;
+}

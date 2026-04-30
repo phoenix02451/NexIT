@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="nexit-bg" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#002e5f"/>
+      <stop offset="1" stop-color="#0a5cad"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#nexit-bg)"/>
+  <!-- Bold “N” -->
+  <path
+    fill="#ffffff"
+    d="M18 46V18h8l10 16V18h10v28h-8L28 30v16H18z"
+  />
+  <circle cx="48" cy="16" r="4" fill="#00bfff"/>
+  <path fill="none" stroke="#00bfff" stroke-width="2" stroke-linecap="round" d="M35 20c3-1.5 7-1.5 10 0"/>
+</svg>

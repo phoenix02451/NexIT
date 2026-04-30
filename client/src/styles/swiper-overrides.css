@@ -1,0 +1,14 @@
+.testimonials-swiper .swiper-pagination-bullet,
+.clients-swiper .swiper-pagination-bullet {
+  background: #002e5f;
+  opacity: 0.4;
+}
+.testimonials-swiper .swiper-pagination-bullet-active,
+.clients-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+  background: #00bfff;
+}
+.testimonials-swiper,
+.clients-swiper {
+  padding-bottom: 3rem;
+}
