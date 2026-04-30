@@ -2,6 +2,8 @@
 
 This project is a **MongoDB + Express + React + Node** version of the original static/PHP site. The UI, sections, carousels, counters, FAQ accordion, navigation, contact form, career application (with resume upload), and newsletter subscription behave the same from a user perspective. Submissions are stored in MongoDB; optional **SMTP** email matches the old PHPMailer behavior when credentials are set.
 
+**Accounts:** Email + password sign-up and sign-in use a JWT in an http-only cookie; optional **Google** sign-in uses `GOOGLE_CLIENT_ID` on the server (see `server/.env.example`).
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+ recommended)

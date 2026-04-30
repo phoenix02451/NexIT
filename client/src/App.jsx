@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
+import { GoogleClientIdProvider, useGoogleClientId } from './context/GoogleClientIdContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
@@ -30,20 +31,27 @@ function RoutesTree() {
   );
 }
 
-export default function App() {
-  const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+function AppWithGoogleOAuth() {
+  const { clientId } = useGoogleClientId();
+  const id = (clientId || '').trim();
+  if (id) {
+    return (
+      <GoogleOAuthProvider clientId={id}>
+        <RoutesTree />
+      </GoogleOAuthProvider>
+    );
+  }
+  return <RoutesTree />;
+}
 
+export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        {googleClientId ? (
-          <GoogleOAuthProvider clientId={googleClientId}>
-            <RoutesTree />
-          </GoogleOAuthProvider>
-        ) : (
-          <RoutesTree />
-        )}
-      </AuthProvider>
+      <GoogleClientIdProvider>
+        <AuthProvider>
+          <AppWithGoogleOAuth />
+        </AuthProvider>
+      </GoogleClientIdProvider>
     </BrowserRouter>
   );
 }

@@ -58,4 +58,8 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
-module.exports = { sendContactEmail, sendCareerEmail, isSmtpConfigured };
+module.exports = {
+  sendContactEmail,
+  sendCareerEmail,
+  isSmtpConfigured,
+};

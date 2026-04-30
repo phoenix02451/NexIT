@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/http';
@@ -14,9 +14,12 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const submitLock = useRef(false);
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (submitLock.current) return;
+    submitLock.current = true;
     setError('');
     setPending(true);
     try {
@@ -26,6 +29,7 @@ export default function Login() {
       setError(err.response?.data?.message || 'Could not sign in.');
     } finally {
       setPending(false);
+      submitLock.current = false;
     }
   }
 
@@ -52,7 +56,7 @@ export default function Login() {
             <div className="auth-card">
               <p className="auth-eyebrow">Welcome back</p>
               <h1 className="auth-title">Sign in</h1>
-              <p className="auth-lead">Use your email or Google to access your account.</p>
+              <p className="auth-lead">Use your email and password, or continue with Google.</p>
 
               <AuthGoogleSignIn
                 mode="login"

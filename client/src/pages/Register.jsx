@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/http';
@@ -13,18 +13,24 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const submitLock = useRef(false);
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (submitLock.current) return;
+    submitLock.current = true;
     setError('');
     setPending(true);
     try {
       await register({ email, password, name });
       navigate('/account', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed.');
+      const m = err.response?.data?.message || 'Registration failed.';
+      const d = err.response?.data?.detail;
+      setError(d ? `${m} ${d}` : m);
     } finally {
       setPending(false);
+      submitLock.current = false;
     }
   }
 
@@ -51,7 +57,7 @@ export default function Register() {
             <div className="auth-card">
               <p className="auth-eyebrow">Get started</p>
               <h1 className="auth-title">Create account</h1>
-              <p className="auth-lead">Register with email or continue with Google.</p>
+              <p className="auth-lead">Register with email and password, or continue with Google.</p>
 
               <AuthGoogleSignIn
                 mode="register"

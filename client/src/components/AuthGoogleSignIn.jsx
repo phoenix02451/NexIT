@@ -1,13 +1,15 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleClientId } from '../context/GoogleClientIdContext';
 import GoogleGLogo from './GoogleGLogo';
 
 /**
  * Sign-in / sign-up with Google block for login and register pages.
- * Requires GoogleOAuthProvider in App when VITE_GOOGLE_CLIENT_ID is set.
+ * Client ID: Vite env VITE_GOOGLE_CLIENT_ID, or runtime GET /api/auth/config (GOOGLE_CLIENT_ID on the server, e.g. Netlify).
  */
 export default function AuthGoogleSignIn({ mode = 'login', onCredential, onFlowError, disabled = false }) {
-  const clientConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
+  const { clientId, loading: configLoading } = useGoogleClientId();
+  const clientConfigured = Boolean((clientId || '').trim());
   const [showSetupHint, setShowSetupHint] = useState(false);
   const shellRef = useRef(null);
   // Match shell width in px — avoid changing on every tick (GSI re-runs when `width` changes; ResizeObserver can thrash the button into blank state)
@@ -40,6 +42,18 @@ export default function AuthGoogleSignIn({ mode = 'login', onCredential, onFlowE
     };
   }, [clientConfigured]);
 
+  if (configLoading) {
+    return (
+      <div className="auth-google-block" role="region" aria-label={regionLabel}>
+        <div className="auth-google-wrap auth-google-widget-shell">
+          <p className="mb-0 text-muted" style={{ fontSize: '0.9rem' }}>
+            Loading Google sign-in…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!clientConfigured) {
     return (
       <div className="auth-google-block" role="region" aria-label={regionLabel}>
@@ -59,10 +73,9 @@ export default function AuthGoogleSignIn({ mode = 'login', onCredential, onFlowE
         </div>
         {showSetupHint ? (
           <p id="auth-google-setup-hint" className="auth-hint auth-google-setup-hint">
-            Google sign-in is not configured yet. Set <code>VITE_GOOGLE_CLIENT_ID</code> in <code>client/.env</code>{' '}
-            (same Web client ID as <code>GOOGLE_CLIENT_ID</code> on the server), restart the dev server, and add this
-            site&apos;s origin under Google Cloud Console → Credentials → OAuth client → Authorized JavaScript
-            origins.
+            Set <code>GOOGLE_CLIENT_ID</code> on the server (and optionally <code>VITE_GOOGLE_CLIENT_ID</code> in{' '}
+            <code>client/.env</code>). In Google Cloud Console → APIs &amp; Services → Credentials → your OAuth Web
+            client, add this site under <strong>Authorized JavaScript origins</strong>.
           </p>
         ) : null}
       </div>
