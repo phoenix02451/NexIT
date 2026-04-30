@@ -2,12 +2,16 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const CareerApplication = require('../models/CareerApplication');
 const { sendCareerEmail } = require('../utils/sendMail');
 
 const router = express.Router();
 
-const uploadDir = path.join(__dirname, '..', 'uploads');
+const isNetlify = process.env.NETLIFY === 'true';
+const uploadDir = isNetlify
+  ? path.join(os.tmpdir(), 'nexit-uploads')
+  : path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
