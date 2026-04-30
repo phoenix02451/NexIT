@@ -1,10 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/http';
+import { getApiErrorMessage } from '../utils/apiErrorMessage';
 
 const GoogleClientIdContext = createContext({
   clientId: '',
   loading: false,
   source: 'none', // 'vite' | 'api' | 'none'
+  /** Set when GET /api/auth/config fails (e.g. API cold start, deploy, or function error). */
+  configLoadError: null,
 });
 
 /**
@@ -20,6 +23,7 @@ export function GoogleClientIdProvider({ children }) {
   const [clientId, setClientId] = useState(viteId);
   const [loading, setLoading] = useState(!viteId);
   const [source, setSource] = useState(viteId ? 'vite' : 'none');
+  const [configLoadError, setConfigLoadError] = useState(null);
 
   useEffect(() => {
     if (viteId) {
@@ -28,16 +32,20 @@ export function GoogleClientIdProvider({ children }) {
     let cancelled = false;
     (async () => {
       try {
+        setConfigLoadError(null);
         const { data } = await api.get('/api/auth/config');
         const id = typeof data?.googleClientId === 'string' ? data.googleClientId.trim() : '';
         if (!cancelled) {
           setClientId(id);
           setSource(id ? 'api' : 'none');
         }
-      } catch {
+      } catch (err) {
         if (!cancelled) {
           setClientId('');
           setSource('none');
+          setConfigLoadError(
+            getApiErrorMessage(err, 'Could not load Google sign-in settings. Try refreshing the page.')
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -49,8 +57,8 @@ export function GoogleClientIdProvider({ children }) {
   }, [viteId]);
 
   const value = useMemo(
-    () => ({ clientId, loading, source }),
-    [clientId, loading, source]
+    () => ({ clientId, loading, source, configLoadError }),
+    [clientId, loading, source, configLoadError]
   );
 
   return <GoogleClientIdContext.Provider value={value}>{children}</GoogleClientIdContext.Provider>;

@@ -8,14 +8,36 @@ const { sendCareerEmail } = require('../utils/sendMail');
 
 const router = express.Router();
 
-const isNetlify = process.env.NETLIFY === 'true';
-const uploadDir = isNetlify
-  ? path.join(os.tmpdir(), 'nexit-uploads')
-  : path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+/** Netlify/AWS bundle may not set NETLIFY=true; Lambda has no writable project dir. */
+function isServerlessRuntime() {
+  return (
+    process.env.NETLIFY === 'true' ||
+    Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
+    Boolean(process.env.LAMBDA_TASK_ROOT)
+  );
+}
+
+function getUploadDir() {
+  if (isServerlessRuntime()) {
+    return path.join(os.tmpdir(), 'nexit-uploads');
+  }
+  return path.join(__dirname, '..', 'uploads');
+}
+
+function ensureUploadDir(dir) {
+  try {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  } catch (e) {
+    console.error('careers upload dir:', dir, e.message);
+  }
+}
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
+  destination: (_req, _file, cb) => {
+    const dir = getUploadDir();
+    ensureUploadDir(dir);
+    cb(null, dir);
+  },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname) || '.pdf';
     const safe = `${Date.now()}-${Math.random().toString(16).slice(2)}${ext}`;

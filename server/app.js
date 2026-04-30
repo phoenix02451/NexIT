@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const { isConnected } = require('./db');
 
 const app = express();
+app.set('trust proxy', 1);
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 const localhostOrigin =
   /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
@@ -41,8 +42,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const isNetlify = process.env.NETLIFY === 'true';
-if (!isNetlify) {
+const isServerless =
+  process.env.NETLIFY === 'true' ||
+  Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
+  Boolean(process.env.LAMBDA_TASK_ROOT);
+if (!isServerless) {
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 }
 

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/http';
+import { getApiErrorMessage } from '../utils/apiErrorMessage';
 import AuthGoogleSignIn from '../components/AuthGoogleSignIn';
 
 export default function Register() {
@@ -25,9 +26,7 @@ export default function Register() {
       await register({ email, password, name });
       navigate('/account', { replace: true });
     } catch (err) {
-      const m = err.response?.data?.message || 'Registration failed.';
-      const d = err.response?.data?.detail;
-      setError(d ? `${m} ${d}` : m);
+      setError(getApiErrorMessage(err, 'Registration failed.'));
     } finally {
       setPending(false);
       submitLock.current = false;
@@ -43,7 +42,7 @@ export default function Register() {
       setUserFromGoogle(data.user);
       navigate('/account', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Google sign-in failed.');
+      setError(getApiErrorMessage(err, 'Google sign-in failed.'));
     } finally {
       setPending(false);
     }

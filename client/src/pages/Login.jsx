@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/http';
+import { getApiErrorMessage } from '../utils/apiErrorMessage';
 import AuthGoogleSignIn from '../components/AuthGoogleSignIn';
 
 export default function Login() {
@@ -26,7 +27,7 @@ export default function Login() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not sign in.');
+      setError(getApiErrorMessage(err, 'Could not sign in.'));
     } finally {
       setPending(false);
       submitLock.current = false;
@@ -42,7 +43,7 @@ export default function Login() {
       setUserFromGoogle(data.user);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Google sign-in failed.');
+      setError(getApiErrorMessage(err, 'Google sign-in failed.'));
     } finally {
       setPending(false);
     }

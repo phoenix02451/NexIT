@@ -8,7 +8,7 @@ import GoogleGLogo from './GoogleGLogo';
  * Client ID: Vite env VITE_GOOGLE_CLIENT_ID, or runtime GET /api/auth/config (GOOGLE_CLIENT_ID on the server, e.g. Netlify).
  */
 export default function AuthGoogleSignIn({ mode = 'login', onCredential, onFlowError, disabled = false }) {
-  const { clientId, loading: configLoading } = useGoogleClientId();
+  const { clientId, loading: configLoading, configLoadError } = useGoogleClientId();
   const clientConfigured = Boolean((clientId || '').trim());
   const [showSetupHint, setShowSetupHint] = useState(false);
   const shellRef = useRef(null);
@@ -48,6 +48,18 @@ export default function AuthGoogleSignIn({ mode = 'login', onCredential, onFlowE
         <div className="auth-google-wrap auth-google-widget-shell">
           <p className="mb-0 text-muted" style={{ fontSize: '0.9rem' }}>
             Loading Google sign-in…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (configLoadError && !clientConfigured) {
+    return (
+      <div className="auth-google-block" role="region" aria-label={regionLabel}>
+        <div className="auth-google-wrap auth-google-widget-shell">
+          <p className="auth-alert mb-0" role="alert">
+            {configLoadError}
           </p>
         </div>
       </div>
