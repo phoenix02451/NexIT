@@ -1,5 +1,5 @@
-# API functions need a hosted Mongo URI in Netlify: Site configuration → Environment variables.
-# Use MONGO_URI, or the same value as MONGODB_URI / DATABASE_URL (MongoDB Atlas SRV recommended).
+# MONGO_URI (or MONGODB_URI / DATABASE_URL): Atlas SRV string in Netlify → Environment variables.
+# Must apply to Serverless functions (not Build-only) for the same deploy context (Production / Previews).
 # Google Sign-In: set GOOGLE_CLIENT_ID (Web OAuth client ID) in Netlify env. Use a scope that includes
 # BOTH Builds and Functions so Vite can bake it into the client and the API can verify Google tokens.
 # Optional: VITE_GOOGLE_CLIENT_ID only if you want to override the value used at build time.

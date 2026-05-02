@@ -18,6 +18,10 @@ function mongoFailureHint(err) {
     return 'Atlas blocked the IP. In Atlas → Network Access, add 0.0.0.0/0 (or allow AWS) for serverless.';
   if (msg.includes('timed out') || msg.includes('serverselectionerror'))
     return 'Could not reach Atlas in time. Resume the cluster if paused (M0), confirm Network Access, and retry.';
+  if (msg.includes('querytxt') || msg.includes('etimeout') || msg.includes('enodata'))
+    return 'DNS lookup to Atlas failed or timed out. Check the hostname in MONGO_URI and your network; try again after a minute.';
+  if (msg.includes('ssl') || msg.includes('tls') || msg.includes('certificate'))
+    return 'TLS error talking to Atlas. Use the official mongodb+srv:// string from Atlas; avoid proxies that intercept HTTPS.';
   return undefined;
 }
 
@@ -48,7 +52,7 @@ exports.handler = async (event, context) => {
           ok: false,
           message: missingConfig
             ? 'Database is not configured. In Netlify: Site configuration → Environment variables → add MONGO_URI (or MONGODB_URI / DATABASE_URL) with your MongoDB Atlas connection string.'
-            : 'Database connection failed. Confirm MONGO_URI in Netlify, Atlas cluster is running, database user/password are correct, and Network Access allows connections (e.g. 0.0.0.0/0 for serverless).',
+            : 'Database connection failed. In Netlify → Environment variables: set MONGO_URI for the same deploy context (Production / Previews) and include scope "Functions" (not Build-only). In Atlas: cluster running, DB user/password correct, Network Access 0.0.0.0/0 for serverless. Redeploy after changing env vars.',
           error: err.message,
           hint: missingConfig ? undefined : mongoFailureHint(err),
         }),

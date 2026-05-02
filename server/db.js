@@ -19,12 +19,25 @@ function resolveMongoUri() {
   return 'mongodb://127.0.0.1:27017/itcompany';
 }
 
-const MONGO_URI = resolveMongoUri();
+/** Netlify UI sometimes saves the URI wrapped in quotes or with stray newlines. */
+function normalizeMongoUri(uri) {
+  let s = String(uri).trim();
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'"))
+  ) {
+    s = s.slice(1, -1).trim();
+  }
+  return s.replace(/[\r\n]+/g, '');
+}
 
 async function connectDB() {
   if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
+
+  const MONGO_URI = normalizeMongoUri(resolveMongoUri());
+
   if (!MONGO_URI) {
     const err = new Error(
       'No MongoDB URI: set MONGO_URI, MONGODB_URI, or DATABASE_URL in Netlify → Site configuration → Environment variables (Atlas or other hosted MongoDB).'
@@ -46,7 +59,8 @@ async function connectDB() {
 
   const opts = {
     maxPoolSize: 5,
-    serverSelectionTimeoutMS: isLambdaRuntime ? 25_000 : 10_000,
+    serverSelectionTimeoutMS: isLambdaRuntime ? 30_000 : 10_000,
+    connectTimeoutMS: isLambdaRuntime ? 25_000 : 10_000,
     ...(isLambdaRuntime ? { family: 4 } : {}),
   };
 
