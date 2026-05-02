@@ -24,14 +24,46 @@ function ok(payload) {
   return { ok: true, ...payload };
 }
 
-async function registerWithPassword({ email, password, name }) {
-  if (!email || typeof email !== 'string') {
+/** Some proxies / clients send a JSON string; keys may use different casing. */
+function asJsonObject(body) {
+  if (body == null) return {};
+  if (typeof body === 'string') {
+    const s = body.trim();
+    if (!s) return {};
+    try {
+      const o = JSON.parse(s);
+      return typeof o === 'object' && o !== null && !Array.isArray(o) ? o : {};
+    } catch {
+      return {};
+    }
+  }
+  if (typeof body === 'object' && !Array.isArray(body)) return body;
+  return {};
+}
+
+function pickField(obj, lowerName) {
+  for (const k of Object.keys(obj)) {
+    if (k.toLowerCase() === lowerName) {
+      const v = obj[k];
+      if (v == null) return '';
+      return typeof v === 'string' ? v : String(v);
+    }
+  }
+  return '';
+}
+
+async function registerWithPassword(body) {
+  const o = asJsonObject(body);
+  const email = pickField(o, 'email').trim();
+  const password = pickField(o, 'password');
+  const name = pickField(o, 'name');
+  if (!email) {
     return fail(400, 'Email is required');
   }
-  if (!password || typeof password !== 'string' || password.length < 8) {
+  if (!password || password.length < 8) {
     return fail(400, 'Password must be at least 8 characters');
   }
-  const normalized = email.trim().toLowerCase();
+  const normalized = email.toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
     return fail(400, 'Enter a valid email address');
   }
@@ -40,7 +72,7 @@ async function registerWithPassword({ email, password, name }) {
     return fail(409, 'An account with this email already exists');
   }
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const nameTrim = typeof name === 'string' ? name.trim().slice(0, 120) : '';
+  const nameTrim = name.trim().slice(0, 120);
   let user;
   try {
     user = await User.create({
@@ -56,11 +88,14 @@ async function registerWithPassword({ email, password, name }) {
   return ok({ user: userPublic(user), token });
 }
 
-async function loginWithPassword({ email, password }) {
+async function loginWithPassword(body) {
+  const o = asJsonObject(body);
+  const email = pickField(o, 'email').trim();
+  const password = pickField(o, 'password');
   if (!email || !password) {
     return fail(400, 'Email and password are required');
   }
-  const normalized = String(email).trim().toLowerCase();
+  const normalized = email.toLowerCase();
   const user = await User.findOne({ email: normalized });
   if (!user || !user.passwordHash) {
     return fail(401, 'Invalid email or password');
