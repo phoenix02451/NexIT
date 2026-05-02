@@ -79,9 +79,10 @@ exports.handler = async (event, context) => {
           ok: false,
           message: missingConfig
             ? 'Database is not configured. In Netlify: Site configuration → Environment variables → add MONGO_URI (or MONGODB_URI / DATABASE_URL) with your MongoDB Atlas connection string.'
-            : 'Database connection failed. In Netlify → Environment variables: set MONGO_URI for the same deploy context (Production / Previews) and include scope "Functions" (not Build-only). In Atlas: cluster running, DB user/password correct, Network Access 0.0.0.0/0 for serverless. Redeploy after changing env vars.',
+            : 'Database connection failed. Check the JSON fields error and hint below, GET /api/health after deploy, and Netlify function logs. Common fixes: MONGO_URI applies to this deploy (Production vs Previews) and to Serverless functions; Atlas Network Access 0.0.0.0/0; URL-encode special characters in the DB password inside the URI; redeploy after env changes.',
           error: err.message,
           hint: missingConfig ? undefined : mongoFailureHint(err),
+          checkUrl: '/api/health',
         }),
       };
     }

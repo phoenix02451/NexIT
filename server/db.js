@@ -13,9 +13,9 @@ function envFlagTrue(name) {
   return v === '1' || v === 'true' || v === 'yes';
 }
 
-/** Atlas from Netlify: we default to IPv4 DNS; set MONGO_DISABLE_IPV4_FORCE=1 if Atlas only works without it. */
+/** Optional: set MONGO_FORCE_IPV4=1 on Netlify only if Atlas times out and Atlas support suggests forcing IPv4. */
 function useIpv4FamilyForLambda() {
-  return isLambdaRuntime && !envFlagTrue('MONGO_DISABLE_IPV4_FORCE');
+  return isLambdaRuntime && envFlagTrue('MONGO_FORCE_IPV4');
 }
 
 function resolveMongoUri() {
@@ -58,11 +58,16 @@ async function connectDB() {
 
   const globalCache = globalThis;
   if (globalCache.__mongoConnPromise) {
-    await globalCache.__mongoConnPromise;
-    return mongoose.connection;
+    try {
+      await globalCache.__mongoConnPromise;
+      return mongoose.connection;
+    } catch (e) {
+      globalCache.__mongoConnPromise = undefined;
+      throw e;
+    }
   }
 
-  // Netlify/Lambda: IPv4 + longer timeout avoids common Atlas "selection timed out" / SRV issues.
+  // Netlify/Lambda: optional IPv4 (MONGO_FORCE_IPV4); shorter timeouts avoid Netlify 504 vs hung connect.
   if (isLambdaRuntime) {
     mongoose.set('bufferCommands', false);
   }
