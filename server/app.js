@@ -38,7 +38,14 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(
+  express.json({
+    limit: '1mb',
+    verify(req, _res, buf) {
+      if (buf?.length) req.rawJsonBody = buf.toString('utf8');
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

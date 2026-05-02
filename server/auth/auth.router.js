@@ -6,11 +6,30 @@ const { isMongoConnectivityError, mongoMessage } = require('./mongoErrorResponse
 
 const router = express.Router();
 
+/** If express.json left an empty object, re-parse from raw buffer (Netlify / API Gateway edge cases). */
+function reviveAuthJsonBody(req, _res, next) {
+  if (req.method !== 'POST') return next();
+  const b = req.body;
+  const keys = b && typeof b === 'object' && !Array.isArray(b) ? Object.keys(b) : [];
+  const hasEmailKey = keys.some((k) => k.toLowerCase() === 'email');
+  if (!hasEmailKey && typeof req.rawJsonBody === 'string' && req.rawJsonBody.trim()) {
+    try {
+      const parsed = JSON.parse(req.rawJsonBody);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        req.body = parsed;
+      }
+    } catch {
+      /* keep existing body */
+    }
+  }
+  next();
+}
+
 router.get('/config', (_req, res) => {
   res.json({ googleClientId: authService.getGoogleClientId() });
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', reviveAuthJsonBody, async (req, res) => {
   try {
     const result = await authService.registerWithPassword(req.body);
     if (!result.ok) {
@@ -27,7 +46,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', reviveAuthJsonBody, async (req, res) => {
   try {
     const result = await authService.loginWithPassword(req.body);
     if (!result.ok) {

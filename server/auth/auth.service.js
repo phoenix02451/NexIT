@@ -27,6 +27,14 @@ function ok(payload) {
 /** Some proxies / clients send a JSON string; keys may use different casing. */
 function asJsonObject(body) {
   if (body == null) return {};
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(body)) {
+    try {
+      const o = JSON.parse(body.toString('utf8'));
+      return typeof o === 'object' && o !== null && !Array.isArray(o) ? o : {};
+    } catch {
+      return {};
+    }
+  }
   if (typeof body === 'string') {
     const s = body.trim();
     if (!s) return {};
@@ -41,6 +49,16 @@ function asJsonObject(body) {
   return {};
 }
 
+/** Some clients wrap fields in `data`, `payload`, or `body`. */
+function mergeNestedCredentials(body) {
+  const base = asJsonObject(body);
+  const nested = base.data ?? base.payload ?? base.body;
+  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+    return { ...nested, ...base };
+  }
+  return base;
+}
+
 function pickField(obj, lowerName) {
   for (const k of Object.keys(obj)) {
     if (k.toLowerCase() === lowerName) {
@@ -53,7 +71,7 @@ function pickField(obj, lowerName) {
 }
 
 async function registerWithPassword(body) {
-  const o = asJsonObject(body);
+  const o = mergeNestedCredentials(body);
   const email = pickField(o, 'email').trim();
   const password = pickField(o, 'password');
   const name = pickField(o, 'name');
@@ -89,7 +107,7 @@ async function registerWithPassword(body) {
 }
 
 async function loginWithPassword(body) {
-  const o = asJsonObject(body);
+  const o = mergeNestedCredentials(body);
   const email = pickField(o, 'email').trim();
   const password = pickField(o, 'password');
   if (!email || !password) {
