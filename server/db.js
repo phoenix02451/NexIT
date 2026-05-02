@@ -39,9 +39,15 @@ async function connectDB() {
     return mongoose.connection;
   }
 
+  // Netlify/Lambda: IPv4 + longer timeout avoids common Atlas "selection timed out" / SRV issues.
+  if (isLambdaRuntime) {
+    mongoose.set('bufferCommands', false);
+  }
+
   const opts = {
     maxPoolSize: 5,
-    serverSelectionTimeoutMS: 10_000,
+    serverSelectionTimeoutMS: isLambdaRuntime ? 25_000 : 10_000,
+    ...(isLambdaRuntime ? { family: 4 } : {}),
   };
 
   globalCache.__mongoConnPromise = mongoose.connect(MONGO_URI, opts);
