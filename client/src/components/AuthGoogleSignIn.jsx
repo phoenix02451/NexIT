@@ -85,9 +85,14 @@ export default function AuthGoogleSignIn({ mode = 'login', onCredential, onFlowE
         </div>
         {showSetupHint ? (
           <p id="auth-google-setup-hint" className="auth-hint auth-google-setup-hint">
-            Set <code>GOOGLE_CLIENT_ID</code> on the server (and optionally <code>VITE_GOOGLE_CLIENT_ID</code> in{' '}
-            <code>client/.env</code>). In Google Cloud Console → APIs &amp; Services → Credentials → your OAuth Web
-            client, add this site under <strong>Authorized JavaScript origins</strong>.
+            Use the same <strong>OAuth 2.0 Web client ID</strong> everywhere (ends in{' '}
+            <code>.apps.googleusercontent.com</code>). Set <code>GOOGLE_CLIENT_ID</code> in{' '}
+            <code>server/.env</code> locally, or in <strong>Netlify → Site configuration → Environment variables</strong>{' '}
+            for production (then redeploy). Optionally set <code>VITE_GOOGLE_CLIENT_ID</code> in <code>client/.env</code>{' '}
+            for local Vite, or add it to Netlify build env so the ID is baked into the client bundle. In{' '}
+            <strong>Google Cloud Console → APIs &amp; Services → Credentials</strong>, open your Web client and add
+            this app’s origin (e.g. <code>http://localhost:5173</code> and your <code>https://…</code> site) under{' '}
+            <strong>Authorized JavaScript origins</strong>.
           </p>
         ) : null}
       </div>
