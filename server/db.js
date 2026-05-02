@@ -4,11 +4,22 @@ const mongoose = require('mongoose');
  * In Netlify (AWS Lambda) each invocation is short-lived; reuse the same connection.
  * @see https://www.mongodb.com/docs/drivers/node/current/faq/
  */
-const MONGO_URI =
-  process.env.MONGO_URI ||
-  (process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME
-    ? ''
-    : 'mongodb://127.0.0.1:27017/itcompany');
+const isLambdaRuntime = Boolean(
+  process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME
+);
+
+function resolveMongoUri() {
+  const fromEnv =
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URI ||
+    process.env.DATABASE_URL ||
+    '';
+  if (fromEnv) return fromEnv.trim();
+  if (isLambdaRuntime) return '';
+  return 'mongodb://127.0.0.1:27017/itcompany';
+}
+
+const MONGO_URI = resolveMongoUri();
 
 async function connectDB() {
   if (mongoose.connection.readyState === 1) {
@@ -16,7 +27,7 @@ async function connectDB() {
   }
   if (!MONGO_URI) {
     const err = new Error(
-      'MONGO_URI is not set. On Netlify you must use MongoDB Atlas (or other hosted MongoDB) and add MONGO_URI in the Netlify UI.'
+      'No MongoDB URI: set MONGO_URI, MONGODB_URI, or DATABASE_URL in Netlify → Site configuration → Environment variables (Atlas or other hosted MongoDB).'
     );
     err.code = 'MONGO_CONFIG';
     throw err;

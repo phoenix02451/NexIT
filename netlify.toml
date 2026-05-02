@@ -1,3 +1,6 @@
+# API functions need a hosted Mongo URI in Netlify: Site configuration → Environment variables.
+# Use MONGO_URI, or the same value as MONGODB_URI / DATABASE_URL (MongoDB Atlas SRV recommended).
+
 [build]
   command = "npm install && npm run build:client"
   publish = "client/dist"
