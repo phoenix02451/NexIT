@@ -8,7 +8,7 @@ const contactRoutes = require('./routes/contact');
 const careerRoutes = require('./routes/careers');
 const subscribeRoutes = require('./routes/subscribe');
 const authRoutes = require('./routes/auth');
-const { isConnected } = require('./db');
+const { isConnected, mongoose } = require('./db');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -56,7 +56,21 @@ app.use('/api/subscribe', subscribeRoutes);
 app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, mongo: isConnected() });
+  const uriConfigured = Boolean(
+    (process.env.MONGO_URI ||
+      process.env.MONGODB_URI ||
+      process.env.DATABASE_URL ||
+      ''
+    ).trim()
+  );
+  res.json({
+    ok: true,
+    mongo: {
+      connected: isConnected(),
+      readyState: mongoose.connection.readyState,
+      uriConfigured,
+    },
+  });
 });
 
 module.exports = app;

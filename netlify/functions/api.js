@@ -25,6 +25,13 @@ function mongoFailureHint(err) {
   return undefined;
 }
 
+function getHeader(event, name) {
+  const h = event.headers || {};
+  const want = name.toLowerCase();
+  const key = Object.keys(h).find((k) => k.toLowerCase() === want);
+  return key ? String(h[key]) : '';
+}
+
 /** GET /api/auth/config only returns env-based googleClientId — no DB. Skip connect so the SPA can load when Mongo is misconfigured. */
 function isAuthConfigGet(event) {
   const method = (
@@ -37,9 +44,29 @@ function isAuthConfigGet(event) {
   return reqPath.includes('auth/config');
 }
 
+/**
+ * Session with no auth cookie/header only returns { user: null } — no DB.
+ * Skipping connect avoids Netlify 504 when Atlas is slow/unreachable (default function limit ~10s).
+ */
+function isAnonymousSessionGet(event) {
+  const method = (
+    event.httpMethod ||
+    event.requestContext?.http?.method ||
+    ''
+  ).toUpperCase();
+  if (method !== 'GET') return false;
+  const reqPath = event.path || event.rawPath || '';
+  if (!reqPath.includes('auth/session')) return false;
+  const auth = getHeader(event, 'authorization');
+  if (auth && /^Bearer\s+\S/i.test(auth.trim())) return false;
+  const cookie = getHeader(event, 'cookie');
+  if (cookie.includes('access_token=')) return false;
+  return true;
+}
+
 exports.handler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
-  if (!isAuthConfigGet(event)) {
+  if (!isAuthConfigGet(event) && !isAnonymousSessionGet(event)) {
     try {
       await connectDB();
     } catch (err) {

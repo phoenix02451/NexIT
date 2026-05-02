@@ -8,6 +8,16 @@ const isLambdaRuntime = Boolean(
   process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME
 );
 
+function envFlagTrue(name) {
+  const v = String(process.env[name] || '').toLowerCase().trim();
+  return v === '1' || v === 'true' || v === 'yes';
+}
+
+/** Atlas from Netlify: we default to IPv4 DNS; set MONGO_DISABLE_IPV4_FORCE=1 if Atlas only works without it. */
+function useIpv4FamilyForLambda() {
+  return isLambdaRuntime && !envFlagTrue('MONGO_DISABLE_IPV4_FORCE');
+}
+
 function resolveMongoUri() {
   const fromEnv =
     process.env.MONGO_URI ||
@@ -57,11 +67,12 @@ async function connectDB() {
     mongoose.set('bufferCommands', false);
   }
 
+  // Stay under Netlify’s default function wall clock (~10s) so we return JSON 503 instead of 504 gateway timeout.
   const opts = {
     maxPoolSize: 5,
-    serverSelectionTimeoutMS: isLambdaRuntime ? 30_000 : 10_000,
-    connectTimeoutMS: isLambdaRuntime ? 25_000 : 10_000,
-    ...(isLambdaRuntime ? { family: 4 } : {}),
+    serverSelectionTimeoutMS: isLambdaRuntime ? 8_000 : 10_000,
+    connectTimeoutMS: isLambdaRuntime ? 7_000 : 10_000,
+    ...(useIpv4FamilyForLambda() ? { family: 4 } : {}),
   };
 
   globalCache.__mongoConnPromise = mongoose.connect(MONGO_URI, opts);

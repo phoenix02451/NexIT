@@ -1,5 +1,6 @@
 # MONGO_URI (or MONGODB_URI / DATABASE_URL): Atlas SRV string in Netlify → Environment variables.
 # Must apply to Serverless functions (not Build-only) for the same deploy context (Production / Previews).
+# If Atlas fails only from Netlify: set MONGO_DISABLE_IPV4_FORCE=1 and redeploy (see server/.env.example).
 # Google Sign-In: set GOOGLE_CLIENT_ID (Web OAuth client ID) in Netlify env. Use a scope that includes
 # BOTH Builds and Functions so Vite can bake it into the client and the API can verify Google tokens.
 # Optional: VITE_GOOGLE_CLIENT_ID only if you want to override the value used at build time.
@@ -11,6 +12,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# If API calls still hit 504, increase function timeout in Netlify UI (Project configuration → Functions).
 
 [functions]
   node_bundler = "esbuild"
