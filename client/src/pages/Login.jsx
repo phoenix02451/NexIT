@@ -16,6 +16,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const submitLock = useRef(false);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -24,7 +26,9 @@ export default function Login() {
     setError('');
     setPending(true);
     try {
-      await login(email, password);
+      const emailVal = (emailRef.current?.value ?? email).trim();
+      const passwordVal = passwordRef.current?.value ?? password;
+      await login(emailVal, passwordVal);
       navigate(from, { replace: true });
     } catch (err) {
       setError(getApiErrorMessage(err, 'Could not sign in.'));
@@ -81,11 +85,14 @@ export default function Login() {
                 </label>
                 <input
                   id="login-email"
+                  ref={emailRef}
+                  name="email"
                   className="auth-input"
                   type="email"
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onInput={(e) => setEmail(e.currentTarget.value)}
                   required
                 />
                 <label className="auth-label" htmlFor="login-password">
@@ -93,11 +100,14 @@ export default function Login() {
                 </label>
                 <input
                   id="login-password"
+                  ref={passwordRef}
+                  name="password"
                   className="auth-input"
                   type="password"
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onInput={(e) => setPassword(e.currentTarget.value)}
                   required
                 />
                 <button type="submit" className="auth-submit" disabled={pending}>

@@ -15,6 +15,9 @@ export default function Register() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const submitLock = useRef(false);
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -23,7 +26,10 @@ export default function Register() {
     setError('');
     setPending(true);
     try {
-      await register({ email, password, name });
+      const emailVal = (emailRef.current?.value ?? email).trim();
+      const passwordVal = passwordRef.current?.value ?? password;
+      const nameVal = (nameRef.current?.value ?? name).trim();
+      await register({ email: emailVal, password: passwordVal, name: nameVal });
       navigate('/account', { replace: true });
     } catch (err) {
       setError(getApiErrorMessage(err, 'Registration failed.'));
@@ -80,6 +86,8 @@ export default function Register() {
                 </label>
                 <input
                   id="reg-name"
+                  ref={nameRef}
+                  name="name"
                   className="auth-input"
                   type="text"
                   autoComplete="name"
@@ -91,11 +99,14 @@ export default function Register() {
                 </label>
                 <input
                   id="reg-email"
+                  ref={emailRef}
+                  name="email"
                   className="auth-input"
                   type="email"
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onInput={(e) => setEmail(e.currentTarget.value)}
                   required
                 />
                 <label className="auth-label" htmlFor="reg-password">
@@ -103,11 +114,14 @@ export default function Register() {
                 </label>
                 <input
                   id="reg-password"
+                  ref={passwordRef}
+                  name="password"
                   className="auth-input"
                   type="password"
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onInput={(e) => setPassword(e.currentTarget.value)}
                   minLength={8}
                   required
                 />
