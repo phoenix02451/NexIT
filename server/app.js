@@ -1,4 +1,5 @@
 require('dotenv').config();
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -12,7 +13,10 @@ const { isConnected, mongoose } = require('./db');
 
 const app = express();
 app.set('trust proxy', 1);
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+const CLIENT_URL =
+  process.env.CLIENT_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  'http://localhost:5173';
 const localhostOrigin =
   /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
 
@@ -23,6 +27,7 @@ function isOriginAllowed(origin) {
   try {
     const host = new URL(origin).hostname;
     if (host.endsWith('.netlify.app') || host === 'netlify.app') return true;
+    if (host.endsWith('.onrender.com') || host === 'onrender.com') return true;
   } catch {
     /* ignore */
   }
@@ -79,5 +84,18 @@ app.get('/api/health', (_req, res) => {
     },
   });
 });
+
+const clientDist = path.join(__dirname, '../client/dist');
+const clientIndex = path.join(clientDist, 'index.html');
+const serveClientSpa =
+  process.env.NODE_ENV === 'production' && fs.existsSync(clientIndex);
+if (serveClientSpa) {
+  app.use(express.static(clientDist));
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(clientIndex);
+  });
+}
 
 module.exports = app;
